@@ -1,4 +1,4 @@
-# claude_cpa
+# claude_development
 
 スマホ用 Web アプリの開発リポジトリ。
 
