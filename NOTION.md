@@ -4,6 +4,7 @@
 
 - ログページ: [スマホWebアプリ 開発ログ](https://app.notion.com/p/3cb13e6b38c981e4a379c797accd6db0)（親ページ: CLAUDE）
 - ログDB: [開発ログ](https://app.notion.com/p/2d27c9c81f944062ad6aa7a659a27a99)
+- 企画ページ: [スマホゲーム 企画メモ](https://app.notion.com/p/3cb13e6b38c981b8a91ec501356be336)（親ページ: Claude）
 
 ## 記録フォーマット
 
