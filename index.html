@@ -1,9 +1,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>NEON BREACH</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&display=swap">
 <style>
+:root{
+  --ui:"Chakra Petch","Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  --ground:#05070c; --panel:#0a1a2c; --accent:#4aa8ff;
+  --ink:#cfe6ff; --ink-dim:#5f87ad; --ink-faint:#3d5a76;
+  --warn:#ffd479; --danger:#ff6b6b; --ok:#7fe0a8;
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:#05070c;color:#cfe6ff;
-  font-family:"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+html,body{width:100%;height:100%;overflow:hidden;background:var(--ground);color:var(--ink);
+  font-family:var(--ui);font-variant-numeric:tabular-nums;
   -webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none}
 #stage{position:fixed;inset:0;overflow:hidden;background:#000}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -34,14 +41,14 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   background:radial-gradient(circle at 50% 42%,rgba(14,32,54,.9),rgba(3,5,10,.97));
   padding:3vh;text-align:center;z-index:10}
 .screen.on{display:flex}
-h1{font-size:min(9vh,64px);letter-spacing:.16em;font-weight:800;
+h1{font-size:min(9vh,64px);letter-spacing:.2em;font-weight:700;
   background:linear-gradient(180deg,#eaf7ff,#4aa8ff 62%,#1d5f9e);
   -webkit-background-clip:text;background-clip:text;color:transparent;
   text-shadow:0 0 34px rgba(60,160,255,.35)}
-h2{font-size:min(5vh,34px);letter-spacing:.12em;font-weight:700;color:#eaf7ff;margin-bottom:1.6vh}
+h2{font-size:min(5vh,34px);letter-spacing:.16em;font-weight:700;color:#eaf7ff;margin-bottom:1.6vh}
 .sub{font-size:min(2.2vh,14px);letter-spacing:.34em;color:#5f87ad;margin-top:.8vh;margin-bottom:3.4vh}
 .menu{display:flex;flex-direction:column;gap:1.2vh;width:min(94vw,340px)}
-button.mi{font:inherit;font-size:min(2.5vh,16px);font-weight:700;letter-spacing:.1em;padding:1.5vh 2vh;
+button.mi{font:inherit;font-size:min(2.5vh,16px);font-weight:600;letter-spacing:.14em;padding:1.5vh 2vh;
   color:#d6ecff;background:rgba(16,38,64,.68);border:1px solid rgba(90,180,255,.34);
   border-radius:10px;cursor:pointer;transition:.12s}
 button.mi:hover,button.mi:active{background:rgba(34,96,158,.8);border-color:rgba(150,220,255,.9);transform:translateY(-1px)}
@@ -74,7 +81,9 @@ input[type=range]::-moz-range-thumb{width:17px;height:17px;border:0;border-radiu
 @keyframes tilt{0%,32%{transform:rotate(0)}62%,100%{transform:rotate(-90deg)}}
 #fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .42s;z-index:30}
 #fade.on{opacity:1}
-.tag{position:absolute;bottom:1.6vh;font-size:min(1.8vh,11px);letter-spacing:.28em;color:#3d5a76}
+.tag{position:absolute;bottom:1.6vh;font-size:min(1.8vh,11px);letter-spacing:.28em;color:var(--ink-faint)}
+button.mi:focus-visible,.seg span:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){#rotate .ph{animation:none}}
 </style>
 
 <div id="stage">
@@ -110,6 +119,7 @@ input[type=range]::-moz-range-thumb{width:17px;height:17px;border:0;border-radiu
   <div class="screen" id="sOpt">
     <h2>SETTINGS</h2>
     <div class="menu">
+      <div class="row"><span>難易度</span><div class="seg" id="oDiff"><span data-v="0">優しめ</span><span data-v="1">標準</span><span data-v="2">高難度</span></div></div>
       <div class="row"><span>視点感度</span><input type="range" id="oSens" min="20" max="300" step="5"><b id="vSens"></b></div>
       <div class="row"><span>視野角 FOV</span><input type="range" id="oFov" min="70" max="110" step="1"><b id="vFov"></b></div>
       <div class="row"><span>解像度</span><div class="seg" id="oRes"><span data-v="0.55">低</span><span data-v="0.78">中</span><span data-v="1">高</span></div></div>
@@ -129,7 +139,8 @@ input[type=range]::-moz-range-thumb{width:17px;height:17px;border:0;border-radiu
       <div class="keys"><b style="color:#eaf7ff;letter-spacing:.18em">PC</b><br>
       <k>W</k><k>A</k><k>S</k><k>D</k> 移動 / マウス 視点 / 左クリック 射撃 / <k>R</k> リロード /
       <k>1</k><k>2</k><k>3</k> 武器 / <k>Q</k> 切替 / <k>Shift</k> ダッシュ / <k>Esc</k> ポーズ<br>
-      画面クリックでマウス視点をロック。扉は近づくと自動で開く。</div>
+      画面クリックでマウス視点をロック。<k>Space</k> でも射撃できる。<br>
+      埋め込み表示などでマウスをロックできない場合は、<em>ドラッグで視点・クリックで射撃</em>に自動で切り替わる。扉は近づくと自動で開く。</div>
       <div class="keys" style="margin-top:1.8vh"><b style="color:#eaf7ff;letter-spacing:.18em">目標</b><br>
       黄色い <em>キーカード</em> を回収し、緑に光る <em>脱出ポッド</em> へ。ミニマップの黄=扉、緑=脱出地点、赤=補足済みの敵。</div>
     </div>
@@ -213,7 +224,7 @@ function fbm(x, y, s, oct = 4) {
 }
 
 /* ---------- persisted settings & records ---------- */
-const DEF = { sens: 110, fov: 90, res: 0.78, auto: 1, sfx: 1, bob: 1 };
+const DEF = { sens: 110, fov: 90, res: 0.78, auto: 1, sfx: 1, bob: 1, diff: 1 };
 let CFG = Object.assign({}, DEF);
 let REC = {};
 try {
@@ -767,9 +778,9 @@ function populate(L, R) {
     add(makeEnemy(k, p.x, p.y));
   }
   // pickups
-  const packs = [['health', GFX.health], ['health', GFX.health], ['armor', GFX.armor],
-                 ['ammoL', GFX.ammoL], ['ammoS', GFX.ammoS], ['ammoR', GFX.ammoR]];
-  const n = 6 + ((rooms.length * .9) | 0);
+  const packs = [['health', GFX.health], ['ammoL', GFX.ammoL], ['health', GFX.health], ['armor', GFX.armor],
+                 ['ammoS', GFX.ammoS], ['health', GFX.health], ['ammoR', GFX.ammoR], ['armor', GFX.armor]];
+  const n = 8 + ((rooms.length * 1.15) | 0);
   for (let i = 0; i < n; i++) {
     const [sub, g] = packs[i % packs.length];
     const p = spot(-1, 3); if (!p) continue;
@@ -827,11 +838,11 @@ function buildLightmap(L) {
    ========================================================================== */
 const ETYPE = {
   soldier: { hp: 58, speed: 1.85, radius: .34, size: 1.02, z: 0, gfx: () => GFX.soldier,
-             atk: 'hitscan', dmg: 8, burst: 3, rate: 1.65, acc: .72, range: 15, sight: 17, score: 100, name: 'SEC-DROID' },
+             atk: 'hitscan', dmg: 6, burst: 3, rate: 1.9, acc: .64, range: 13, sight: 15, score: 100, name: 'SEC-DROID' },
   drone:   { hp: 32, speed: 2.55, radius: .3, size: .72, z: .38, gfx: () => GFX.drone,
-             atk: 'plasma', dmg: 13, burst: 1, rate: 1.45, acc: 1, range: 13, sight: 16, score: 80, name: 'HUNTER' },
+             atk: 'plasma', dmg: 10, burst: 1, rate: 1.6, acc: 1, range: 12, sight: 15, score: 80, name: 'HUNTER' },
   brute:   { hp: 240, speed: 1.42, radius: .5, size: 1.42, z: 0, gfx: () => GFX.brute,
-             atk: 'mortar', dmg: 24, burst: 2, rate: 2.3, acc: 1, range: 17, sight: 20, score: 400, name: 'BRUTE' }
+             atk: 'mortar', dmg: 19, burst: 2, rate: 2.5, acc: 1, range: 15, sight: 18, score: 400, name: 'BRUTE' }
 };
 function makeEnemy(kind, x, y) {
   const t = ETYPE[kind];
@@ -929,6 +940,7 @@ addEventListener('keydown', e => {
   if (e.repeat) { e.preventDefault(); return; }
   keys[e.code] = 1;
   if (e.code === 'Escape') { if (G.running && !G.over) togglePause(); }
+  if (e.code === 'Space') { IN.fire = 1; IN.firePress = 1; }
   if (e.code === 'KeyR') IN.reload = 1;
   if (e.code === 'KeyE') IN.use = 1;
   if (e.code === 'KeyQ') IN.swap = 1;
@@ -937,8 +949,12 @@ addEventListener('keydown', e => {
   if (e.code === 'Digit3') IN.wnum = 2;
   if (['KeyW','KeyA','KeyS','KeyD','Space','Tab'].includes(e.code)) e.preventDefault();
 });
-addEventListener('keyup', e => { keys[e.code] = 0; });
-addEventListener('blur', () => { for (const k in keys) keys[k] = 0; if (G.running && !G.paused && !G.over) togglePause(); });
+addEventListener('keyup', e => { keys[e.code] = 0; if (e.code === 'Space') IN.fire = 0; });
+addEventListener('blur', () => {
+  for (const k in keys) keys[k] = 0;
+  IN.fire = 0; dragging = false;
+  if (G.running && !G.paused && !G.over) togglePause();
+});
 
 function readKeys() {
   if (TOUCH) return;
@@ -953,17 +969,33 @@ function readKeys() {
   IN.runT = (keys.ShiftLeft || keys.ShiftRight) ? 1 : 0;
 }
 
-/* --- mouse --- */
-viewC.addEventListener('click', () => {
-  if (G.running && !G.paused && !G.over && !TOUCH && !locked) viewC.requestPointerLock();
-});
+/* --- mouse ---
+   Pointer lock is the good path, but it is refused inside sandboxed iframes
+   (embedded previews). When that happens, fall back to hold-and-drag aiming. */
+let lockBlocked = false, dragging = false;
 document.addEventListener('pointerlockchange', () => {
   locked = document.pointerLockElement === viewC;
-  if (!locked && G.running && !G.paused && !G.over && !TOUCH) togglePause();
+  if (locked) lockBlocked = false;
+  else if (!lockBlocked && G.running && !G.paused && !G.over && !TOUCH) togglePause();
 });
-addEventListener('mousemove', e => { if (locked) { IN.dx += e.movementX * .55; IN.dy += e.movementY * .55; } });
+document.addEventListener('pointerlockerror', () => { lockBlocked = true; noLockHint(); });
+function noLockHint() { if (!noLockHint.done) { noLockHint.done = 1; say('ドラッグで視点 / クリックで射撃', 3.4); } }
+viewC.addEventListener('mousedown', e => {
+  if (TOUCH || !G.running || G.paused || G.over || e.button !== 0 || locked) return;
+  if (!lockBlocked) {
+    let p;
+    try { p = viewC.requestPointerLock(); } catch (err) { lockBlocked = true; }
+    if (p && p.catch) p.catch(() => { lockBlocked = true; noLockHint(); });
+    setTimeout(() => { if (document.pointerLockElement !== viewC) { lockBlocked = true; noLockHint(); } }, 400);
+    return;                                   // the first click only grabs the mouse
+  }
+  dragging = true; IN.fire = 1; IN.firePress = 1;
+});
+addEventListener('mousemove', e => {
+  if (locked || dragging) { IN.dx += e.movementX * .55; IN.dy += e.movementY * .55; }
+});
 addEventListener('mousedown', e => { if (locked && e.button === 0) { IN.fire = 1; IN.firePress = 1; } });
-addEventListener('mouseup', e => { if (e.button === 0) IN.fire = 0; });
+addEventListener('mouseup', e => { if (e.button === 0) { IN.fire = 0; dragging = false; } });
 addEventListener('contextmenu', e => { if (G.running) e.preventDefault(); });
 
 /* --- touch: dynamic left stick + right-side look drag --- */
@@ -1089,8 +1121,11 @@ function popProp(e) {
   if (e.explode) explode(e.x, e.y, 60, 3.1);
   else spawnParticles(e.x, e.y, .4, 8, GFX.smoke, 2, .5, 1.5);
 }
+const DIFF_NAME = ['優しめ', '標準', '高難度'];
+const DIFF_SCALE = [.62, 1, 1.45];
 function hurtPlayer(dmg) {
   if (P.dead || P.invuln > 0) return;
+  dmg *= DIFF_SCALE[CFG.diff] || 1;
   if (P.armor > 0) { const a = Math.min(P.armor, dmg * .55); P.armor -= a; dmg -= a; }
   P.hp -= dmg;
   P.hurt = Math.min(1, P.hurt + dmg / 45);
@@ -1273,7 +1308,7 @@ function updateEnemies(dt) {
         if (e.burstT <= 0) { if (canSee) enemyShoot(e, dist); e.burst--; e.burstT = .13; }
       } else if (e.cd < T.rate - .35) e.state = 'chase';
     }
-    if (T.atk === 'mortar' && dist < 1.7 && e.cd < T.rate - .9) { hurtPlayer(20); e.cd = T.rate; G.shake = 10; }
+    if (T.atk === 'mortar' && dist < 1.7 && e.cd < T.rate - .9) { hurtPlayer(15); e.cd = T.rate; G.shake = 10; }
     if (!canSee && Math.hypot(tx - e.x, ty - e.y) < .9) { e.state = 'idle'; e.seen = 0; e.st = 1; }
   }
 }
@@ -1322,7 +1357,7 @@ function collect(e) {
   const s = e.sub;
   const give = (t, n) => { const before = P.ammo[t]; P.ammo[t] = Math.min(AMMO_CAP[t], P.ammo[t] + n); return P.ammo[t] > before; };
   let ok = false;
-  if (s === 'health') { if (P.hp < 100) { P.hp = Math.min(100, P.hp + 28); ok = true; say('+28 VITALS'); } }
+  if (s === 'health') { if (P.hp < 100) { P.hp = Math.min(100, P.hp + 32); ok = true; say('+32 VITALS'); } }
   else if (s === 'armor') { if (P.armor < 100) { P.armor = Math.min(100, P.armor + 40); ok = true; say('+40 ARMOR'); } }
   else if (s === 'key') { P.key = true; ok = true; SFX.play('key'); say('KEYCARD 取得 — 脱出ポッドへ', 3.4); }
   else if (s === 'ammoL') { ok = give('L', 34); if (ok) say('+34 ' + AMMO_LABEL.L); }
@@ -1559,6 +1594,10 @@ function project(x, y, z) {
    HUD  (drawn at device resolution on a second canvas)
    ========================================================================== */
 const hctx = viewC.getContext('2d', { alpha: false });
+const FONT = '"Chakra Petch","Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif';
+if (document.fonts && document.fonts.load) {         // warm the face so canvas text isn't drawn in the fallback
+  ['600 16px "Chakra Petch"', '700 16px "Chakra Petch"'].forEach(f => { try { document.fonts.load(f); } catch (e) {} });
+}
 const fmtTime = t => `${(t / 60) | 0}:${('0' + Math.floor(t % 60)).slice(-2)}`;
 
 function drawWeapon(c) {
@@ -1749,26 +1788,26 @@ function drawHUD() {
   const vitX = pad, vitY = TOUCH ? 62 * u : SH - pad - 26 * u;
   const bw = Math.min(SW * (TOUCH ? .22 : .3), (TOUCH ? 168 : 220) * u), bh = 10 * u;
   c.textBaseline = 'middle'; c.textAlign = 'left';
-  c.font = `700 ${10 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.font = `700 ${10 * u}px ${FONT}`;
   c.fillStyle = '#6f9dc0'; c.fillText('VITALS', vitX, vitY - 10 * u);
   bar(c, vitX, vitY, bw, bh, P.hp / 100, 'rgba(255,120,120,.8)',
       P.hp < 35 ? 'rgba(255,70,70,.92)' : 'rgba(255,140,140,.85)');
   bar(c, vitX, vitY + 13 * u, bw, bh, P.armor / 100, 'rgba(110,190,255,.8)', 'rgba(110,190,255,.85)');
-  c.fillStyle = '#eaf7ff'; c.font = `800 ${14 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.fillStyle = '#eaf7ff'; c.font = `800 ${14 * u}px ${FONT}`;
   c.fillText(Math.ceil(P.hp) + '', vitX + bw + 8 * u, vitY + 5 * u);
-  c.fillStyle = '#9fd4ff'; c.font = `700 ${11 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.fillStyle = '#9fd4ff'; c.font = `700 ${11 * u}px ${FONT}`;
   c.fillText(Math.ceil(P.armor) + '', vitX + bw + 8 * u, vitY + 18 * u);
 
   const w2 = W();
   const amX = TOUCH ? gm.cx - gm.R - 12 * u : SW - pad;
   const amY = TOUCH ? 46 * u : SH - pad - 22 * u;
   c.textAlign = 'right';
-  c.fillStyle = '#9fd4ff'; c.font = `800 ${12 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.fillStyle = '#9fd4ff'; c.font = `800 ${12 * u}px ${FONT}`;
   c.fillText(w2.name, amX, amY - 26 * u);
   c.fillStyle = P.mag[P.wpn] === 0 ? '#ff7a6a' : '#eaf7ff';
-  c.font = `800 ${30 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.font = `800 ${30 * u}px ${FONT}`;
   c.fillText(P.mag[P.wpn] + '', amX, amY);
-  c.fillStyle = '#6f9dc0'; c.font = `700 ${12 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.fillStyle = '#6f9dc0'; c.font = `700 ${12 * u}px ${FONT}`;
   c.fillText('/ ' + P.ammo[w2.ammo] + '  ' + AMMO_LABEL[w2.ammo], amX, amY + 17 * u);
   if (P.reloadT > 0) {
     const pr = 1 - P.reloadT / w2.reload, ww = 78 * u;
@@ -1783,20 +1822,20 @@ function drawHUD() {
     c.fillStyle = i === P.wpn ? 'rgba(60,150,220,.85)' : 'rgba(10,24,40,.6)';
     rr(c, x - 12 * u, y - 9 * u, 25 * u, 18 * u, 4 * u);
     c.fillStyle = i === P.wpn ? '#ffffff' : '#6f9dc0';
-    c.font = `700 ${11 * u}px "Helvetica Neue",Arial,sans-serif`;
+    c.font = `700 ${11 * u}px ${FONT}`;
     c.fillText((i + 1) + '', x, y);
   }
 
   /* ---- top: objective / stats ---- */
   c.textAlign = 'left';
   c.fillStyle = 'rgba(4,10,18,.5)'; rr(c, pad - 6 * u, 8 * u, 186 * u, 38 * u, 6 * u);
-  c.fillStyle = '#6f9dc0'; c.font = `700 ${10 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.fillStyle = '#6f9dc0'; c.font = `700 ${10 * u}px ${FONT}`;
   c.fillText(G.level.st.code + ' — ' + G.level.st.name, pad, 19 * u);
   c.fillStyle = P.key ? '#7fe0a8' : '#ffd479';
-  c.font = `700 ${12 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.font = `700 ${12 * u}px ${FONT}`;
   c.fillText(P.key ? '▶ 脱出ポッドへ向かえ' : '▶ キーカードを回収せよ', pad, 36 * u);
   c.textAlign = 'center';
-  c.fillStyle = '#6f9dc0'; c.font = `700 ${11 * u}px "Helvetica Neue",Arial,sans-serif`;
+  c.fillStyle = '#6f9dc0'; c.font = `700 ${11 * u}px ${FONT}`;
   c.fillText(`${fmtTime(G.elapsed)}   KILLS ${G.kills}/${G.level.enemies.length}`, SW / 2, 20 * u);
   drawMinimap(c);
 
@@ -1805,7 +1844,7 @@ function drawHUD() {
     const a = clamp(G.msgT / .45, 0, 1);
     c.textAlign = 'center';
     c.fillStyle = `rgba(230,246,255,${a})`;
-    c.font = `800 ${16 * u}px "Helvetica Neue",Arial,sans-serif`;
+    c.font = `800 ${16 * u}px ${FONT}`;
     c.fillText(G.msg, SW / 2, SH * .74);
   }
 }
@@ -1839,6 +1878,7 @@ function slider(id, vid, key, fmt) {
 slider('oSens', 'vSens', 'sens', v => v + '%');
 slider('oFov', 'vFov', 'fov', v => v + '°');
 seg('oRes', 'res', resize); seg('oAuto', 'auto'); seg('oSfx', 'sfx'); seg('oBob', 'bob');
+seg('oDiff', 'diff');
 
 /* --- stage select --- */
 function unlocked(i) { return i === 0 || (REC[i - 1] && REC[i - 1].cleared); }
@@ -1850,7 +1890,7 @@ function buildStageList() {
     b.className = 'mi' + (ok ? '' : ' ghost');
     b.innerHTML = ok
       ? `${i + 1}. ${s.name}<div style="font-size:.72em;color:#7fa8c8;font-weight:600;letter-spacing:.06em;margin-top:.4em">
-         ${r && r.cleared ? 'CLEAR — ' + fmtTime(r.time) + ' / ACC ' + r.acc + '%' : 'NOT CLEARED'}</div>`
+         ${r && r.cleared ? 'CLEAR — ' + fmtTime(r.time) + ' / ACC ' + r.acc + '% / ' + DIFF_NAME[r.diff === undefined ? 1 : r.diff] : 'NOT CLEARED'}</div>`
       : `${i + 1}. ??????<div style="font-size:.72em;color:#5a7996;font-weight:600;margin-top:.4em">前のステージをクリアで解放</div>`;
     b.disabled = !ok;
     if (ok) b.addEventListener('click', () => { SFX.play('ui'); openBrief(i); });
@@ -1863,7 +1903,8 @@ function openBrief(i) {
   $('bTitle').textContent = s.name;
   $('bSub').textContent = s.code;
   $('bText').innerHTML = s.brief +
-    `<br><br>敵性体 <em>${s.pop.soldier + s.pop.drone + s.pop.brute}</em> / 区画サイズ <em>${s.w}×${s.h}</em>`;
+    `<br><br>敵性体 <em>${s.pop.soldier + s.pop.drone + s.pop.brute}</em> / 区画サイズ <em>${s.w}×${s.h}</em>` +
+    ` / 難易度 <em>${DIFF_NAME[CFG.diff]}</em>`;
   showScreen('sBrief');
 }
 
@@ -1889,14 +1930,14 @@ function deploy() {
   resize();
   showScreen(null);
   say('区画に降下 — ' + st.name, 2.6);
-  if (!TOUCH) { try { viewC.requestPointerLock(); } catch (e) {} }
+  if (!TOUCH && !lockBlocked) { try { const p = viewC.requestPointerLock(); if (p && p.catch) p.catch(() => { lockBlocked = true; noLockHint(); }); } catch (e) { lockBlocked = true; } }
   if (TOUCH && stage.requestFullscreen) { try { stage.requestFullscreen(); } catch (e) {} }
 }
 function togglePause() {
   if (!G.running || G.over) return;
   G.paused = !G.paused;
   if (G.paused) { backTo = 'sPause'; showScreen('sPause'); if (document.exitPointerLock) document.exitPointerLock(); }
-  else { showScreen(null); if (!TOUCH) { try { viewC.requestPointerLock(); } catch (e) {} } }
+  else { showScreen(null); if (!TOUCH && !lockBlocked) { try { const p = viewC.requestPointerLock(); if (p && p.catch) p.catch(() => { lockBlocked = true; }); } catch (e) { lockBlocked = true; } } }
 }
 function endMission(win) {
   if (G.over) return;
@@ -1906,7 +1947,7 @@ function endMission(win) {
   if (win) {
     SFX.play('win');
     const prev = REC[G.stage];
-    const rec = { cleared: true, time: G.elapsed, kills: G.kills, acc, score: G.score };
+    const rec = { cleared: true, time: G.elapsed, kills: G.kills, acc, score: G.score, diff: CFG.diff };
     if (!prev || !prev.cleared || prev.time > rec.time) REC[G.stage] = rec; else prev.cleared = true;
     saveRec();
     const total = G.level.enemies.length;
