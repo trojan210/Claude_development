@@ -107,9 +107,14 @@ scripts/
   new_assignment.py  課題を Notion と Git の両方に作る
   add_reference.py   DOI/ISBN/手動で文献DBに登録
   push_final.py      確定版を Notion に書き込む（出典検証を含む）
+project_knowledge/        ← ルールの正本。Claude のプロジェクトナレッジに添付する
+  00_プロジェクト指示.md    カスタム指示欄に貼る本文
+  レポート作成ルール.md     引用・字数・文体・構成・点検・禁止事項
+  Notion運用ガイド.md       どこに何を記録するか
+  科目別メモ.md             科目ごとの例外と留意点
 prompts/
-  report_generate.md  レポート生成の定型プロンプト
-  report_review.md    推敲・検証の定型プロンプト
+  report_generate.md  正本へのポインタ（本文は複製しない）
+  report_review.md    既存原稿の再点検用
 reports/<年度学期>/<科目>_<課題名>/
   assignment.md  課題要件
   draft.md       草稿
