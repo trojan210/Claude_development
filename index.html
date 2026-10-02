@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#021826" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Bali Blue Dive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- title / dive briefing -->
+  <section id="title" class="screen show">
+    <div class="caustic-bg"></div>
+    <div class="title-inner">
+      <h1>BALI BLUE<span>バリ島 ダイビング・シミュレーター</span></h1>
+      <div id="sites" class="sites"></div>
+      <div class="opts">
+        <label>操作
+          <select id="opt-mode">
+            <option value="real">リアル（BCD・呼吸で浮力調整）</option>
+            <option value="easy">イージー（自動で中性浮力）</option>
+          </select>
+        </label>
+        <label>画質
+          <select id="opt-quality">
+            <option value="auto">自動</option>
+            <option value="high">高</option>
+            <option value="medium">中</option>
+            <option value="low">低</option>
+          </select>
+        </label>
+        <label class="chk"><input type="checkbox" id="opt-sound" checked /> サウンド</label>
+      </div>
+      <button id="btn-start" class="primary">エントリー</button>
+      <p class="note">ヘッドホン推奨。PC はクリックで視点操作（Esc で一時停止）。</p>
+    </div>
+  </section>
+
+  <section id="loading" class="screen">
+    <div class="load-inner"><div class="spinner"></div><p id="load-text">海を準備しています…</p></div>
+  </section>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="compass"><div id="compass-strip"></div><div id="compass-heading">000°</div><div class="compass-mark"></div></div>
+    <div id="computer">
+      <div class="dc-row main">
+        <div class="dc-cell big"><label>DEPTH</label><span id="dc-depth">0.0</span><em>m</em></div>
+        <div class="dc-cell"><label id="dc-ndl-label">NDL</label><span id="dc-ndl">99+</span></div>
+        <div id="dc-asc"></div>
+      </div>
+      <div class="dc-row">
+        <div class="dc-cell"><label>MAX</label><span id="dc-max">0.0</span><em>m</em></div>
+        <div class="dc-cell"><label>TIME</label><span id="dc-time">0:00</span></div>
+        <div class="dc-cell"><label>TEMP</label><span id="dc-temp">28°C</span></div>
+      </div>
+      <div class="dc-row tank"><label>AIR</label><div class="bar"><div id="dc-bar-fill"></div></div><span id="dc-bar">200 bar</span></div>
+      <div class="tissue"><div id="dc-tissue"></div></div>
+      <div id="dc-stop"></div>
+    </div>
+    <div id="buoy" title="浮力">
+      <div class="buoy-scale"><span>＋</span><span>0</span><span>－</span></div>
+      <div id="buoy-needle"></div>
+      <div class="bcd-tank"><div id="bcd-level"></div></div>
+      <small>BCD</small>
+    </div>
+    <div id="light-ind">LIGHT</div>
+    <div id="msg"></div>
+    <div id="toast"></div>
+    <div id="hint"></div>
+    <div id="gallery"></div>
+    <div id="log"><h2>図鑑 <span id="log-count"></span></h2><ul id="log-list"></ul><p class="close-hint">Tab / 📖 で閉じる</p></div>
+  </div>
+
+  <!-- touch controls -->
+  <div id="touch" class="hidden">
+    <div id="stick"><div id="knob"></div></div>
+    <div class="tcol">
+      <button class="tbtn" id="tb-pause">II</button>
+      <button class="tbtn" id="tb-log">📖</button>
+      <button class="tbtn" id="tb-photo">📷</button>
+      <button class="tbtn" id="tb-light">💡</button>
+    </div>
+    <div class="tcol right">
+      <button class="tbtn big" id="tb-up">▲</button>
+      <button class="tbtn big" id="tb-fast">≫</button>
+      <button class="tbtn big" id="tb-down">▼</button>
+    </div>
+  </div>
+
+  <section id="pause" class="screen">
+    <div class="panel">
+      <h2>一時停止</h2>
+      <button id="btn-resume" class="primary">再開</button>
+      <button id="btn-surface">浮上してダイブを終了</button>
+    </div>
+  </section>
+
+  <section id="summary" class="screen">
+    <div class="panel log-sheet">
+      <h2>ダイブログ</h2>
+      <div id="summary-body"></div>
+      <button id="btn-again" class="primary">もう一度潜る</button>
+    </div>
+  </section>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
