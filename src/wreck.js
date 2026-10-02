@@ -37,13 +37,14 @@ function encrustColor(p, rand) {
   if (n1 < -0.2) c.lerp(new THREE.Color('#56603a'), smoothstep(-0.2, -0.45, n1)); // turf algae
   if (n2 > 0.45) c.lerp(new THREE.Color('#c0682e'), 0.7); // orange encrusting sponge
   if (n2 < -0.55) c.lerp(new THREE.Color('#d8d0b8'), 0.5); // pale hydroids
-  const v = 0.8 + rand() * 0.25;
+  const v = 2.2;
+  void rand;
   return [c.r * v, c.g * v, c.b * v];
 }
 
 function hullSection(u0, u1, rand, holeSeed) {
-  const nu = Math.max(4, Math.round((u1 - u0) * 110));
-  const nv = 44;
+  const nu = Math.max(4, Math.round((u1 - u0) * 200));
+  const nv = 72;
   const pos = [], col = [], uv = [], idx = [];
   const p = new THREE.Vector3();
   const hs = new Simplex(holeSeed);
@@ -68,7 +69,7 @@ function hullSection(u0, u1, rand, holeSeed) {
     for (let j = 0; j < nv; j++) {
       const u = u0 + (u1 - u0) * ((i + 0.5) / nu), v = -1 + 2 * ((j + 0.5) / nv);
       // corrosion holes and missing plates
-      const hole = hs.fbm2(u * 40, v * 6, 2);
+      const hole = hs.fbm2(u * 46, v * 7, 3) + hs.noise2(u * 220, v * 30) * 0.12;
       const edgeBreak = (Math.min(i, nu - i) < 2 && hs.noise2(i, j * 0.5) > 0.1);
       if (hole > 0.42 - (Math.abs(v) > 0.7 ? 0.15 : 0) || edgeBreak) continue;
       const a = i * w + j, b = (i + 1) * w + j, c = (i + 1) * w + j + 1, d = i * w + j + 1;
@@ -237,10 +238,27 @@ export class Wreck {
       roughness: 0.9,
       metalness: 0.05,
       side: THREE.DoubleSide,
-      normalMap: rockTex.normalMap,
-      normalScale: new THREE.Vector2(1.3, 1.3),
     });
-    patchUW(mat, { key: 'wreck' });
+    // world-space triplanar encrustation: no UV seams on the broken plating
+    patchUW(mat, {
+      key: 'wreck',
+      uniforms: { uRockMap: { value: rockTex.map }, uRockN: { value: rockTex.normalMap } },
+      fragPars: 'uniform sampler2D uRockMap; uniform sampler2D uRockN;',
+      fragColor: `
+        vec3 wWp = (vec4(-vViewPosition, 0.0) * viewMatrix).xyz + cameraPosition;
+        vec3 wNg = inverseTransformDirection(normalize(vNormal), viewMatrix);
+        vec3 tw = pow(abs(wNg), vec3(4.0)); tw /= tw.x + tw.y + tw.z;
+        vec3 rk = texture2D(uRockMap, wWp.zy * 0.3).rgb * tw.x + texture2D(uRockMap, wWp.xz * 0.3).rgb * tw.y + texture2D(uRockMap, wWp.xy * 0.3).rgb * tw.z;
+        diffuseColor.rgb *= rk / 0.32;
+        // growth prefers up-facing surfaces; undersides stay rusty and dark
+        diffuseColor.rgb *= mix(0.55, 1.0, smoothstep(-0.6, 0.4, wNg.y));`,
+      fragNormal: `
+        {
+          vec3 nWd = inverseTransformDirection(normal, viewMatrix);
+          nWd = uwTriplanarNormal(uRockN, wWp, nWd, 0.3, 1.3);
+          normal = normalize((viewMatrix * vec4(nWd, 0.0)).xyz);
+        }`,
+    });
     this.meshes = world.map((g) => {
       const mesh = new THREE.Mesh(g, mat);
       mesh.castShadow = true;
@@ -271,7 +289,7 @@ export class Wreck {
   }
 
   encrust(world, reef, quality, rand) {
-    const want = { soft: 900, fan: 260, crinoid: 420, tube: 260, branch2: 120, boulder: 160, anemone: 30 };
+    const want = { soft: 800, fan: 300, crinoid: 360, tube: 240, branch2: 120, boulder: 180, anemone: 24 };
     const types = Object.fromEntries(reef.types.map((t) => [t.key, t]));
     const pal = {
       soft: ['#e0507a', '#ff6a3c', '#c04ad0', '#f2d6dc', '#ff8a5a', '#e070b0'],
@@ -303,7 +321,7 @@ export class Wreck {
         if (area < 0.05) continue;
         n.normalize();
         if (n.y < 0) n.negate(); // either face of the plating can host growth if it faces up
-        if (n.y < (key === 'fan' ? -0.1 : 0.25)) continue;
+        if (n.y < (key === 'fan' || key === 'soft' || key === 'tube' ? -0.35 : 0.2)) continue;
         let u = rand(), v = rand();
         if (u + v > 1) { u = 1 - u; v = 1 - v; }
         p.copy(a).addScaledVector(b.clone().sub(a), u).addScaledVector(c.clone().sub(a), v);
@@ -315,7 +333,8 @@ export class Wreck {
         m.compose(p, q, sc);
         mats.push(m.clone());
         const col = new THREE.Color(pal[key][Math.floor(rand() * pal[key].length)]);
-        col.offsetHSL((rand() - 0.5) * 0.04, 0, (rand() - 0.5) * 0.1);
+        col.offsetHSL((rand() - 0.5) * 0.04, 0, (rand() - 0.5) * 0.08);
+        col.multiplyScalar(1.5);
         cols.push(col);
       }
       const im = new THREE.InstancedMesh(t.geo, t.mat, mats.length);

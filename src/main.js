@@ -24,9 +24,9 @@ function qualityPreset(name) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   if (name === 'auto') name = isTouch ? 'low' : 'high';
   const presets = {
-    high: { pixelRatio: Math.min(dpr, 1.5), msaa: 4, shaftSteps: 22, terrainSeg: 300, surfaceSeg: 128, texSize: 512, reefDensity: 1, fishDensity: 1, bloom: true, shadowSize: 2048, reefShadows: true, high: true, snow: 5000, viewDist: 95 },
-    medium: { pixelRatio: Math.min(dpr, 1.25), msaa: 2, shaftSteps: 14, terrainSeg: 220, surfaceSeg: 96, texSize: 512, reefDensity: 0.7, fishDensity: 0.7, bloom: true, shadowSize: 1024, reefShadows: false, high: false, snow: 3500, viewDist: 80 },
-    low: { pixelRatio: Math.min(dpr, 1.0), msaa: 0, shaftSteps: 8, terrainSeg: 160, surfaceSeg: 64, texSize: 256, reefDensity: 0.42, fishDensity: 0.5, bloom: false, shadowSize: 0, reefShadows: false, high: false, snow: 2000, viewDist: 65 },
+    high: { pixelRatio: Math.min(dpr, 1.5), msaa: 4, shaftSteps: 22, terrainSeg: 300, surfaceSeg: 128, texSize: 512, reefDensity: 1, fishDensity: 1, bloom: true, shadowSize: 2048, reefShadows: true, high: true, snow: 5000, viewDist: 75 },
+    medium: { pixelRatio: Math.min(dpr, 1.25), msaa: 2, shaftSteps: 14, terrainSeg: 220, surfaceSeg: 96, texSize: 512, reefDensity: 0.7, fishDensity: 0.7, bloom: true, shadowSize: 1024, reefShadows: false, high: false, snow: 3500, viewDist: 62 },
+    low: { pixelRatio: Math.min(dpr, 1.0), msaa: 0, shaftSteps: 8, terrainSeg: 160, surfaceSeg: 64, texSize: 256, reefDensity: 0.32, fishDensity: 0.4, bloom: false, shadowSize: 0, reefShadows: false, high: false, snow: 2000, viewDist: 48 },
   };
   return { name, ...presets[name] };
 }
@@ -132,7 +132,7 @@ class Game {
     this.torchOn = false;
 
     progress('カスティクスを生成…'); await nextFrame();
-    this.caustics = new Caustics(renderer, q.high ? 512 : 256);
+    this.caustics = new Caustics(renderer, q.high ? 512 : 256, q.high ? 192 : q.name === 'medium' ? 128 : 96);
     this.caustics.update();
 
     progress('海底地形を生成…'); await nextFrame();
@@ -167,6 +167,7 @@ class Game {
     for (const c of this.creatures) scene.add(c.group);
 
     this.surface = new Surface(q);
+    this.surface.material.uniforms.uCWaves.value = this.caustics.mat.uniforms.uWaves.value;
     scene.add(this.surface.mesh);
     this.snow = new MarineSnow(q.snow, 24);
     scene.add(this.snow.points);
@@ -362,14 +363,16 @@ class Game {
     // eye adaptation: partially compensate for the light lost with depth
     const kd = U.uKd.value;
     const lum = 0.2126 * Math.exp(-kd.x * d.depth) + 0.7152 * Math.exp(-kd.y * d.depth) + 0.0722 * Math.exp(-kd.z * d.depth);
-    const targetExp = 2.4 * Math.pow(1 / Math.max(lum, 0.02), 0.55);
-    this.exposure = this.exposure ? this.exposure + (targetExp - this.exposure) * Math.min(1, dt * 0.6) : targetExp;
+    // looking up toward Snell's window the eye stops down
+    const lookUp = THREE.MathUtils.smoothstep(d.pitch, 0.1, 1.2);
+    const targetExp = 3.0 * Math.pow(1 / Math.max(lum, 0.02), 0.55) * (1 - 0.72 * lookUp);
+    this.exposure = this.exposure ? this.exposure + (targetExp - this.exposure) * Math.min(1, dt * 1.2) : targetExp;
     this.post.final.uniforms.uExposure.value = this.exposure;
     // partial chromatic adaptation (von Kries): the eye re-balances the blue-green ambient light
     const amb = [Math.exp(-kd.x * (d.depth + 4)), Math.exp(-kd.y * (d.depth + 4)), Math.exp(-kd.z * (d.depth + 4))];
     const ka = 0.32;
     const wb = amb.map((a) => Math.pow(1 / Math.max(a, 1e-3), ka));
-    const wl = 0.2126 * wb[0] + 0.7152 * wb[1] + 0.0722 * wb[2];
+    const wl = (wb[1] + wb[2]) * 0.5; // keep blue-green brightness, lift the depleted reds
     this.post.final.uniforms.uWB.value.set(wb[0] / wl, wb[1] / wl, wb[2] / wl);
     this.post.final.uniforms.uFlash.value = Math.max(0, (this.post.final.uniforms.uFlash.value || 0) - dt * 4);
 
@@ -460,4 +463,4 @@ class Game {
 }
 
 // expose for automated visual testing
-window.__bali = { get game() { return game; }, SITES };
+window.__bali = { get game() { return game; }, SITES, THREE };

@@ -41,7 +41,7 @@ function makeMat(opts) {
       vec3 dWp = (vec4(-vViewPosition, 0.0) * viewMatrix).xyz + cameraPosition;
       vec3 dNw = inverseTransformDirection(normalize(vNormal), viewMatrix);
       float dAO = uwTriplanarScalar(uDetailAO, dWp, dNw, ${(1 / det.scale).toFixed(3)});
-      diffuseColor.rgb *= mix(1.0, dAO * 1.25, ${det.ao.toFixed(2)});` : '',
+      diffuseColor.rgb *= mix(1.0, 0.55 + dAO * 0.6, ${det.ao.toFixed(2)});` : '',
     fragNormal: det ? `
       {
         vec3 nWd = inverseTransformDirection(normal, viewMatrix);
@@ -143,7 +143,8 @@ export class Reef {
         sc.set(s * (0.85 + rand() * 0.3), s * (0.8 + rand() * 0.4), s * (0.85 + rand() * 0.3));
         m4.compose(p, q, sc);
         const col = hex(pal[Math.floor(rand() * pal.length)]);
-        col.offsetHSL((rand() - 0.5) * 0.03, (rand() - 0.5) * 0.15, (rand() - 0.5) * 0.12);
+        col.offsetHSL((rand() - 0.5) * 0.03, (rand() - 0.5) * 0.15, (rand() - 0.5) * 0.08);
+        col.multiplyScalar(1.5);
         const cx = Math.min(nChunks - 1, Math.floor((x + WORLD_HALF) / CHUNK));
         const cz = Math.min(nChunks - 1, Math.floor((z + WORLD_HALF) / CHUNK));
         const key = cz * nChunks + cx;

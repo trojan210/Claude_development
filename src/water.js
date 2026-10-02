@@ -77,17 +77,17 @@ vec3 uwCaustics(vec3 wp, float blurBias) {
   float d = max(-wp.y, 0.0);
   vec2 p = wp.xz - uSunDirW.xz * (wp.y / uSunDirW.y);
   vec2 uv = p / uCausticScale;
-  // caustic lines widen and lose contrast with depth (focal spread)
-  float spread = 0.0015 + d * 0.00035;
+  // light lines widen and soften with depth; dispersion splits colours slightly
+  float bias = blurBias + log2(1.0 + d * 0.12);
+  float spread = 0.0012 + d * 0.0003;
   vec3 c;
-  c.r = texture2D(uCaustic, uv + vec2(spread, 0.0), blurBias).r;
-  c.g = texture2D(uCaustic, uv, blurBias).r;
-  c.b = texture2D(uCaustic, uv - vec2(spread, spread * 0.5), blurBias).r;
-  vec2 uv2 = uv * 0.43 + vec2(0.31, 0.77);
-  float big = texture2D(uCaustic, uv2, blurBias + 1.0).r;
-  c = mix(c, vec3(big), smoothstep(4.0, 22.0, d) * 0.6);
-  float contrast = uCausticStrength * (0.18 + 1.25 * exp(-d / 11.0));
-  return max(vec3(1.0) + (c - 0.32) * contrast * 2.6, vec3(0.15));
+  c.r = texture2D(uCaustic, uv + vec2(spread, 0.0), bias).r;
+  c.g = texture2D(uCaustic, uv, bias).r;
+  c.b = texture2D(uCaustic, uv - vec2(spread, spread * 0.5), bias).r;
+  float big = texture2D(uCaustic, uv * 0.37 + vec2(0.31, 0.77), bias + 1.0).r;
+  c = mix(c, vec3(big), smoothstep(6.0, 26.0, d) * 0.5);
+  float contrast = uCausticStrength * (0.22 + 0.78 * exp(-d / 13.0));
+  return max(mix(vec3(1.0), c, contrast), vec3(0.08));
 }
 // world-space triplanar normal perturbation (whiteout blend); returns perturbed world normal
 vec3 uwTriplanarNormal(sampler2D tex, vec3 wp, vec3 n, float scale, float strength) {

@@ -82,12 +82,12 @@ export function makeSandTextures(kind, size = 512) {
       const speck = rand();
       let r, g, b;
       if (kind === 'volcanic') {
-        const base = 0.2 + grain * 0.1 + (rip * 0.5 + 0.5) * 0.05;
+        const base = 0.34 + grain * 0.12 + (rip * 0.5 + 0.5) * 0.06;
         r = base * 1.0; g = base * 0.96; b = base * 0.92;
-        if (speck > 0.985) { r += 0.35; g += 0.33; b += 0.3; } // quartz / shell fragments
-        else if (speck > 0.96) { r += 0.08; g += 0.06; b += 0.04; }
+        if (speck > 0.994) { r += 0.16; g += 0.15; b += 0.14; } // quartz / shell fragments
+        else if (speck > 0.96) { r += 0.05; g += 0.04; b += 0.03; }
       } else {
-        const base = 0.62 + grain * 0.18 + (rip * 0.5 + 0.5) * 0.06;
+        const base = 0.72 + grain * 0.14 + (rip * 0.5 + 0.5) * 0.06;
         r = base * 1.0; g = base * 0.95; b = base * 0.84;
         if (speck > 0.985) { r *= 0.55; g *= 0.5; b *= 0.45; } // dark grains
         else if (speck > 0.97) { r += 0.12; g += 0.1; b += 0.12; }
@@ -117,9 +117,9 @@ export function makeRockTextures(kind, size = 512) {
       const enc = ns[2](u, v); // encrusting algae / sponge patches
       let r, g, b;
       if (kind === 'volcanic') {
-        r = 0.12 + f * 0.12; g = 0.11 + f * 0.11; b = 0.1 + f * 0.1;
+        r = 0.26 + f * 0.16; g = 0.25 + f * 0.15; b = 0.24 + f * 0.14;
       } else {
-        r = 0.45 + f * 0.25; g = 0.42 + f * 0.22; b = 0.36 + f * 0.2;
+        r = 0.6 + f * 0.25; g = 0.57 + f * 0.22; b = 0.5 + f * 0.2;
       }
       // coralline algae (pink/purple) and turf algae (olive)
       if (enc > 0.62) { const t = Math.min(1, (enc - 0.62) * 5); r += t * 0.35; g += t * 0.08; b += t * 0.2; }

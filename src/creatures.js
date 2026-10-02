@@ -219,7 +219,7 @@ function mantaGeometry() {
         const t = j / nz;
         const z = b + (f - b) * t;
         const a = Math.abs(x) / span;
-        const thick = 0.075 * Math.pow(1 - a, 1.4) * Math.sin(t * Math.PI) + 0.004;
+        const thick = 0.09 * Math.pow(1 - a, 1.6) * Math.sin(t * Math.PI) + 0.005;
         const y = (s === 0 ? 1 : -1) * thick + (1 - a) * 0.02;
         pos.push(x, y, z);
         uv.push(x, z);
@@ -284,7 +284,7 @@ function mantaMaterial(seed) {
         float ax = abs(position.x);
         // wave travels from leading to trailing edge, amplitude grows toward the wingtips
         float w = sin(uFlap - position.z * 2.2 - ax * 0.6);
-        transformed.y += w * pow(ax, 1.6) * 0.42;
+        transformed.y += w * pow(ax, 1.6) * 0.32;
         transformed.y += sin(uFlap - 1.5) * 0.02 * (1.0 - ax);
         if (position.z < -0.4) transformed.x += sin(uFlap * 0.5 + position.z * 5.0) * 0.04 * (-position.z - 0.4);
       `,

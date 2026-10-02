@@ -38,6 +38,7 @@ for (const [i, p] of poses.entries()) {
     d.vel.set(0, 0, 0);
     g.torchOn = !!p.torch;
     d.mode = 'easy';
+    g.exposure = 0; // snap eye adaptation for the screenshot
   }, p);
   await page.waitForTimeout(p.wait || 2500);
   if (p.eval) console.log('eval:', JSON.stringify(await page.evaluate(p.eval)));

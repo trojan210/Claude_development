@@ -69,7 +69,7 @@ function mediumShader(steps) {
         float y0 = min(uCamPos.y, 0.0);
         float mu = max(uSunDirW.y, 0.2);
         float cosSun = dot(dir, uSunDirW);
-        float phSun = mix(hgPhase(cosSun, 0.86), 0.0796, 0.25);
+        float phSun = mix(hgPhase(cosSun, 0.72), 0.0796, 0.4);
 
         // analytic single scattering (sun beam + diffuse sky light, multiple scattering approximated)
         vec3 qs = ext - uKd * dir.y / mu;
@@ -92,9 +92,9 @@ function mediumShader(steps) {
           vec3 att = exp(-ext * s);
           // shafts: caustic focusing seen volumetrically
           vec2 proj = p.xz - uSunDirW.xz * (p.y / uSunDirW.y);
-          float pat = texture2D(uCaustic, proj / (uCausticScale * 2.2), 2.5).r;
-          pat += texture2D(uCaustic, proj / (uCausticScale * 0.9) + 0.37, 1.5).r * 0.5;
-          float shaft = (pat - 0.45) * 2.0 * exp(-dpt / 22.0);
+          float pat = texture2D(uCaustic, proj / (uCausticScale * 1.6), 3.0).r;
+          pat += texture2D(uCaustic, proj / (uCausticScale * 0.7) + 0.37, 2.0).r * 0.6;
+          float shaft = (pat / 1.6 - 1.0) * 1.4 * exp(-dpt / 25.0);
           shaftAcc += shaft * exp(-uKd * dpt / mu) * att * ds;
           // torch
           if (uTorchOn > 0.5) {
@@ -142,7 +142,7 @@ const finalShader = {
     vec3 aces(vec3 x) {
       const mat3 m1 = mat3(0.59719, 0.07600, 0.02840, 0.35458, 0.90834, 0.13383, 0.04823, 0.01566, 0.83777);
       const mat3 m2 = mat3(1.60475, -0.10208, -0.00327, -0.53108, 1.10813, -0.07276, -0.07367, -0.00605, 1.07602);
-      vec3 v = m1 * x;
+      vec3 v = m1 * (x / 0.6);
       vec3 a = v * (v + 0.0245786) - 0.000090537;
       vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081;
       return clamp(m2 * (a / b), 0.0, 1.0);

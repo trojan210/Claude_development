@@ -19,7 +19,9 @@ function smooth(a, b, x) { const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
 
 /** Unit-length fish (z: -0.5 tail .. +0.5 head). Attribute aBody = (t along body, rel height, fin id). */
 function fishGeometry(sp) {
-  const nu = 22, nv = 14;
+  // small fish are only ever a few pixels tall: fewer rings
+  const nu = sp.len < 0.15 ? 10 : sp.len < 0.5 ? 14 : 18;
+  const nv = sp.len < 0.15 ? 6 : sp.len < 0.5 ? 9 : 12;
   const pos = [], body = [], idx = [];
   const prof = (t) => {
     const e = smooth(0.0, 0.42, t) * (1 - Math.pow(smooth(0.5, 1.0, t), 2.4) * 0.88);
@@ -563,7 +565,7 @@ export class FishManager {
     this.obstacles = reef.colliders;
 
     if (has('jack')) {
-      const home = wreck ? wreck.center.clone().add(new THREE.Vector3(10, 6, 6)) : new THREE.Vector3(s.x + 25, -12, s.z + 50);
+      const home = wreck ? wreck.center.clone().add(new THREE.Vector3(8, 3, 24)) : new THREE.Vector3(s.x + 25, -12, s.z + 50);
       this.add(new School(SPECIES.jack, Math.floor(260 * q), env, rand, { home, homeR: 10, speed: 0.9, maxSpeed: 3.2, nr: 1.8, sep: 0.75, mill: 1.3, minAlt: 3, fleeR: 3.2 }), 'jack', home);
     }
     if (has('fusilier')) {

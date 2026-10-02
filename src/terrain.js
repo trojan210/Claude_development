@@ -72,15 +72,20 @@ export class Terrain {
         float large = tNoise(vWUv * 0.05) * 0.6 + tNoise(vWUv * 0.17) * 0.4;
         diffuseColor.rgb = mix(diffuseColor.rgb, sand2, 0.45) * (0.8 + large * 0.45);
         float rockMask = smoothstep(0.15, 0.6, vRock + (tNoise(vWUv * 0.6) - 0.5) * 0.35);
-        vec3 rockCol = texture2D(uRockMap, vWUv / 5.0).rgb * (0.85 + tNoise(vWUv*0.3)*0.3);
+        // triplanar on rock so steep boulder faces are not stretched
+        vec3 tWp = (vec4(-vViewPosition, 0.0) * viewMatrix).xyz + cameraPosition;
+        vec3 tNw = inverseTransformDirection(normalize(vNormal), viewMatrix);
+        vec3 tw = pow(abs(tNw), vec3(4.0)); tw /= tw.x + tw.y + tw.z;
+        vec3 rockCol = (texture2D(uRockMap, tWp.zy / 5.0).rgb * tw.x + texture2D(uRockMap, tWp.xz / 5.0).rgb * tw.y + texture2D(uRockMap, tWp.xy / 5.0).rgb * tw.z)
+          * (0.85 + tNoise(vWUv * 0.3) * 0.3);
         diffuseColor.rgb = mix(diffuseColor.rgb, rockCol, rockMask);
       `,
       fragNormal: `
-        #ifdef USE_NORMALMAP_TANGENTSPACE
-          vec3 rn = texture2D(uRockNormal, vWUv / 5.0).xyz * 2.0 - 1.0;
-          rn.xy *= 1.4;
-          normal = normalize(mix(normal, normalize(tbn * rn), rockMask));
-        #endif
+        {
+          vec3 nWr = inverseTransformDirection(normal, viewMatrix);
+          vec3 nR = uwTriplanarNormal(uRockNormal, tWp, nWr, 0.2, 1.4);
+          normal = normalize(mix(normal, (viewMatrix * vec4(nR, 0.0)).xyz, rockMask));
+        }
       `,
     });
     this.material = mat;

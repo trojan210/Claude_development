@@ -40,6 +40,8 @@ export class Surface {
           'uCausticScale', 'uCausticStrength', 'uTorchOn', 'uTorchPos', 'uTorchDir', 'uTorchColor', 'uTorchPower', 'uSunDirAir']),
         uWaves: { value: waveDefs },
         uOffset: { value: new THREE.Vector2() },
+        uCWaves: { value: [] },
+        uCTile: { value: 7 },
       },
       vertexShader: /* glsl */ `
         uniform float uTime;
@@ -65,6 +67,8 @@ export class Surface {
       fragmentShader: /* glsl */ `
         ${UW_COMMON}
         uniform vec3 uSunDirAir;
+        uniform vec4 uCWaves[14];
+        uniform float uCTile;
         varying vec3 vWorld;
         varying vec3 vN;
         float sHash(vec2 p){ return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
@@ -77,14 +81,15 @@ export class Surface {
         }
         vec3 skyColor(vec3 d) {
           float up = clamp(d.y, 0.0, 1.0);
-          vec3 zen = vec3(0.16, 0.38, 0.85);
-          vec3 hor = vec3(0.7, 0.85, 1.0);
-          vec3 c = mix(hor, zen, pow(up, 0.6)) * 1.6;
+          // sky radiance (irradiance / pi scale)
+          vec3 zen = vec3(0.1, 0.24, 0.6);
+          vec3 hor = vec3(0.42, 0.52, 0.62);
+          vec3 c = mix(hor, zen, pow(up, 0.6)) * 0.55;
           vec2 cp = d.xz / max(d.y, 0.08) * 0.6 + uTime * 0.004;
           float cl = clouds(cp);
-          c = mix(c, vec3(2.4), cl * 0.75 * smoothstep(0.02, 0.25, d.y));
+          c = mix(c, vec3(0.75), cl * 0.75 * smoothstep(0.02, 0.25, d.y));
           float sd = max(dot(d, uSunDirAir), 0.0);
-          c += uSunColor * (pow(sd, 1600.0) * 220.0 + pow(sd, 64.0) * 2.2 + pow(sd, 6.0) * 0.25);
+          c += uSunColor * (pow(sd, 1600.0) * 160.0 + pow(sd, 64.0) * 0.9 + pow(sd, 6.0) * 0.06);
           return c;
         }
         float hgPhase(float cosT, float g) {
@@ -93,13 +98,14 @@ export class Surface {
         }
         void main() {
           vec3 I = normalize(vWorld - cameraPosition);
-          // small-scale capillary normal from the caustic field (same waves that make the caustics)
-          vec2 uv = vWorld.xz / uCausticScale;
-          float e = 1.0 / 256.0;
-          float c0 = texture2D(uCaustic, uv).r;
-          float cx = texture2D(uCaustic, uv + vec2(e, 0.0)).r;
-          float cz = texture2D(uCaustic, uv + vec2(0.0, e)).r;
-          vec3 detail = vec3(cx - c0, 0.0, cz - c0) * 0.55;
+          // small-scale waves: exactly the field that focuses the caustics below
+          vec2 grad = vec2(0.0);
+          for (int i = 0; i < 14; i++) {
+            vec4 w = uCWaves[i];
+            float ph = dot(w.xy, vWorld.xz) - w.w * uTime * 0.85 + float(i) * 1.7;
+            grad += w.z * w.xy * cos(ph);
+          }
+          vec3 detail = vec3(-grad.x, 0.0, -grad.y) * 0.9;
           float dist = length(vWorld - cameraPosition);
           detail *= exp(-dist * 0.02);
           vec3 nUp = normalize(vN + detail);

@@ -57,7 +57,7 @@ export function boulderCoral(detail = 4, brain = false) {
   }
   g.computeVertexNormals();
   setColor(g, (p) => {
-    const ao = THREE.MathUtils.clamp(0.35 + p.y * 1.1, 0.25, 1.0);
+    const ao = THREE.MathUtils.clamp(0.6 + p.y * 0.6, 0.5, 1.0);
     return [ao, ao, ao];
   });
   return g;
@@ -68,14 +68,14 @@ function branchTree(rand, opts) {
   const up = new THREE.Vector3(0, 1, 0);
   const grow = (start, dir, len, rad, depth) => {
     const end = start.clone().addScaledVector(dir, len);
-    const cyl = new THREE.CylinderGeometry(rad * opts.taper, rad, len, opts.radial, 1, depth === 0);
+    const cyl = new THREE.CylinderGeometry(rad * opts.taper, rad, len, opts.radial, 1, depth < opts.depth);
     cyl.translate(0, len / 2, 0);
     const q = new THREE.Quaternion().setFromUnitVectors(up, dir);
     cyl.applyQuaternion(q);
     cyl.translate(start.x, start.y, start.z);
     const tip = 1 - depth / (opts.depth + 1);
     setColor(cyl, (p) => {
-      const ao = THREE.MathUtils.clamp(0.35 + p.y / opts.height * 0.8, 0.3, 1);
+      const ao = THREE.MathUtils.clamp(0.6 + p.y / opts.height * 0.5, 0.55, 1);
       const t = depth >= opts.depth ? 1 : 0;
       return [ao * (1 + t * opts.tipBoost[0]), ao * (1 + t * opts.tipBoost[1]), ao * (1 + t * opts.tipBoost[2])];
     });
@@ -112,8 +112,8 @@ function branchTree(rand, opts) {
 /** Staghorn / bushy Acropora. */
 export function branchingCoral(seed = 1) {
   return branchTree(mulberry32(seed), {
-    trunks: 4, len: 0.38, rad: 0.055, taper: 0.75, radial: 5, depth: 3, height: 1.1,
-    spread: 0.75, upBias: 0.25, trunkTilt: 0.8, tipSphere: true,
+    trunks: 4, len: 0.38, rad: 0.055, taper: 0.75, radial: 4, depth: 3, height: 1.1,
+    spread: 0.75, upBias: 0.25, trunkTilt: 0.8, tipSphere: false,
     tipBoost: [0.5, 0.45, 0.6],
     children: (r, d) => (d < 1 ? 3 : 2),
   });
@@ -122,7 +122,7 @@ export function branchingCoral(seed = 1) {
 /** Soft coral (Sinularia / Dendronephthya): thick fleshy lobes. */
 export function softCoral(seed = 2) {
   return branchTree(mulberry32(seed), {
-    trunks: 3, len: 0.3, rad: 0.09, taper: 0.72, radial: 6, depth: 2, height: 0.8,
+    trunks: 3, len: 0.3, rad: 0.09, taper: 0.72, radial: 5, depth: 2, height: 0.8,
     spread: 0.9, upBias: 0.35, trunkTilt: 0.5, tipSphere: true,
     tipBoost: [0.25, 0.2, 0.25],
     children: (r) => 2 + (r() > 0.5 ? 1 : 0),
@@ -150,13 +150,13 @@ export function tableCoral() {
   plate = clean(plate).toNonIndexed();
   setColor(plate, (p) => {
     const r = Math.hypot(p.x, p.z);
-    const top = p.y > 0.6 + r * r * 0.12 ? 1 : 0.5;
+    const top = p.y > 0.6 + r * r * 0.12 ? 1 : 0.65;
     const edge = 1 + Math.max(0, r - 0.85) * 2.2;
     return [top * edge, top * edge * 0.98, top * edge];
   });
   const stalk = new THREE.CylinderGeometry(0.1, 0.18, 0.6, 7);
   stalk.translate(0, 0.3, 0);
-  setColor(stalk, (p) => [0.4 + p.y * 0.5, 0.4 + p.y * 0.5, 0.4 + p.y * 0.5]);
+  setColor(stalk, (p) => [0.6 + p.y * 0.4, 0.6 + p.y * 0.4, 0.6 + p.y * 0.4]);
   return mergeGeometries([plate, clean(stalk).toNonIndexed()]);
 }
 
@@ -171,7 +171,7 @@ export function barrelSponge() {
   }
   // lip and inner wall
   pts.push(new THREE.Vector2(0.62, 1.42), new THREE.Vector2(0.55, 1.35), new THREE.Vector2(0.45, 0.5));
-  let g = new THREE.LatheGeometry(pts, 36);
+  let g = new THREE.LatheGeometry(pts, 24);
   const pos = g.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i), y = pos.getY(i);
@@ -183,8 +183,8 @@ export function barrelSponge() {
   g = clean(g);
   setColor(g, (p) => {
     const rr = Math.hypot(p.x, p.z);
-    const inner = rr < 0.5 && p.y > 0.5 ? 0.35 : 1;
-    const ao = THREE.MathUtils.clamp(0.4 + p.y * 0.5, 0.3, 1) * inner;
+    const inner = rr < 0.5 && p.y > 0.5 ? 0.5 : 1;
+    const ao = THREE.MathUtils.clamp(0.6 + p.y * 0.3, 0.55, 1) * inner;
     return [ao, ao, ao];
   });
   return g;
@@ -198,13 +198,13 @@ export function tubeSponges(seed = 3) {
   for (let i = 0; i < k; i++) {
     const h = 0.3 + rand() * 0.6;
     const r = 0.05 + rand() * 0.05;
-    const c = new THREE.CylinderGeometry(r * 1.1, r, h, 9, 3, true);
+    const c = new THREE.CylinderGeometry(r * 1.1, r, h, 7, 1, true);
     c.translate(0, h / 2, 0);
     c.rotateZ((rand() - 0.5) * 0.5);
     c.rotateX((rand() - 0.5) * 0.5);
     const a = rand() * Math.PI * 2, d = rand() * 0.15;
     c.translate(Math.cos(a) * d, 0, Math.sin(a) * d);
-    setColor(c, (p) => { const ao = 0.4 + p.y * 0.8; return [ao, ao, ao]; });
+    setColor(c, (p) => { const ao = Math.min(1, 0.6 + p.y * 0.6); return [ao, ao, ao]; });
     parts.push(clean(c).toNonIndexed());
   }
   return mergeGeometries(parts);
@@ -218,12 +218,12 @@ export function anemone(seed = 4) {
   base.translate(0, 0.07, 0);
   setColor(base, () => [0.55, 0.5, 0.5]);
   parts.push(clean(base).toNonIndexed());
-  const count = 140;
+  const count = 80;
   for (let i = 0; i < count; i++) {
     const a = rand() * Math.PI * 2;
     const r = Math.sqrt(rand()) * 0.33;
     const h = 0.12 + rand() * 0.12;
-    const t = new THREE.ConeGeometry(0.018, h, 4, 2);
+    const t = new THREE.ConeGeometry(0.022, h, 3, 1);
     t.translate(0, h / 2, 0);
     const out = new THREE.Vector3(Math.cos(a), 1.4 - r * 2, Math.sin(a)).normalize();
     t.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), out));
@@ -263,7 +263,7 @@ export function reefRock(seed = 5) {
     pos.setXYZ(i, v.x, v.y, v.z);
   }
   g.computeVertexNormals();
-  setColor(g, (p) => { const ao = THREE.MathUtils.clamp(0.4 + p.y, 0.3, 1); return [ao, ao, ao]; });
+  setColor(g, (p) => { const ao = THREE.MathUtils.clamp(0.6 + p.y * 0.6, 0.5, 1); return [ao, ao, ao]; });
   return g;
 }
 
@@ -271,10 +271,10 @@ export function reefRock(seed = 5) {
 export function crinoid(seed = 6) {
   const rand = mulberry32(seed);
   const parts = [];
-  for (let i = 0; i < 24; i++) {
-    const a = (i / 24) * Math.PI * 2 + rand() * 0.2;
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2 + rand() * 0.2;
     const len = 0.25 + rand() * 0.12;
-    const c = new THREE.CylinderGeometry(0.004, 0.009, len, 3, 3);
+    const c = new THREE.CylinderGeometry(0.004, 0.009, len, 3, 1);
     c.translate(0, len / 2, 0);
     const dir = new THREE.Vector3(Math.cos(a), 0.55 + rand() * 0.4, Math.sin(a)).normalize();
     c.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir));
