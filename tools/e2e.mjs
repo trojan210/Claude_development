@@ -1,0 +1,38 @@
+// End-to-end smoke test: start a dive, swim, toggle torch / log / photo, surface, check the logbook.
+import { chromium } from '@playwright/test';
+const url = process.argv[2] || 'http://localhost:4173/';
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+const errors = [];
+page.on('pageerror', (e) => errors.push(e.message));
+page.on('console', (m) => { if (m.type() === 'error' && !/ERR_CERT|404/.test(m.text())) errors.push(m.text()); });
+await page.goto(url);
+await page.selectOption('#opt-quality', 'low');
+await page.selectOption('#opt-mode', 'real');
+await page.click('#btn-start');
+await page.waitForFunction(() => window.__bali.game?.started, null, { timeout: 300000 });
+const kb = page.keyboard;
+await kb.down('KeyW'); await kb.down('KeyQ');
+await page.waitForTimeout(4000);
+await kb.up('KeyQ');
+await kb.press('KeyF');
+await kb.press('KeyP');
+await page.waitForTimeout(1500);
+await kb.up('KeyW');
+await kb.press('Tab');
+await page.waitForTimeout(500);
+const st = await page.evaluate(() => {
+  const g = window.__bali.game;
+  return { depth: g.diver.depth, time: g.diver.time, torch: g.torchOn, logOpen: g.logOpen, photos: document.querySelectorAll('#gallery img').length };
+});
+console.log('state', JSON.stringify(st));
+await kb.press('Tab');
+await page.evaluate(() => window.__bali.game.endDive('surface'));
+await page.waitForSelector('#summary.show', { timeout: 5000 });
+console.log('summary', (await page.textContent('#summary-body')).replace(/\s+/g, ' ').slice(0, 200));
+await page.click('#btn-again');
+const titleVisible = await page.isVisible('#title.show');
+console.log('back to title', titleVisible);
+console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'no errors');
+await browser.close();
+process.exit(errors.length || !st.torch || !st.logOpen || st.photos < 1 || !titleVisible ? 1 : 0);

@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node tools/physics-test.mjs",
+    "e2e": "node tools/e2e.mjs",
+    "shots": "node tools/screenshot.mjs"
   },
   "repository": {
     "type": "git",

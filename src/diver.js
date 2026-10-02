@@ -91,6 +91,10 @@ export class Diver {
       this.bcd += (Math.max(0, need) - this.bcd) * Math.min(1, dt * 1.5);
       if (ax.up) thrust.y += 0.3;
       if (ax.down) thrust.y -= 0.3;
+      // depth hold: when no vertical input, gently trim back to the depth where the diver stopped
+      if (ax.up || ax.down || this.holdY === undefined) this.holdY = this.pos.y;
+      else if (Math.abs(ax.forward) < 0.05) thrust.y += (this.holdY - this.pos.y) * 0.25 - this.vel.y * 0.8;
+      else this.holdY = this.pos.y;
     }
 
     // --- breathing (lung volume changes buoyancy by ~±1 kg — real divers fine-tune with it)

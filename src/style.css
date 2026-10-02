@@ -10,7 +10,9 @@
   --sans: 'Noto Sans JP', system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: #021826; color: var(--ink); font-family: var(--sans); -webkit-user-select: none; user-select: none; touch-action: none; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #021826; color: var(--ink); font-family: var(--sans); -webkit-user-select: none; user-select: none; overscroll-behavior: none; }
+#app, #touch { touch-action: none; }
+.screen { touch-action: pan-y; }
 #app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
 .hidden { display: none !important; }
 
@@ -126,18 +128,30 @@ button.primary { background: linear-gradient(180deg, #2fd0ff, #0a8cc4); border: 
 
 /* ---------------- touch */
 #touch { position: fixed; inset: 0; z-index: 11; pointer-events: none; }
-#stick { position: absolute; left: 40px; bottom: 120px; width: 110px; height: 110px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.05); opacity: 0.35; }
+#stick { position: absolute; left: 120px; bottom: 34px; width: 110px; height: 110px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.05); opacity: 0.35; }
 #knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); }
 .tcol { position: absolute; top: 60px; left: max(12px, env(safe-area-inset-left)); display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
 .tcol.right { left: auto; top: auto; right: max(72px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); }
 .tbtn { width: 46px; height: 46px; padding: 0; border-radius: 50%; background: rgba(0, 30, 50, 0.45); border: 1px solid rgba(255, 255, 255, 0.3); font-size: 18px; touch-action: none; }
 .tbtn.big { width: 62px; height: 62px; font-size: 22px; }
 .tbtn.on { background: rgba(95, 224, 255, 0.45); }
-body.touch #computer { transform: scale(0.82); transform-origin: left bottom; bottom: auto; top: max(110px, env(safe-area-inset-top)); left: 70px; }
+body.touch #computer { transform: scale(0.7); transform-origin: right top; bottom: auto; left: auto; top: max(48px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); }
+body.touch #toast { right: auto; left: 50%; top: 56px; transform: translate(-50%, -260%); }
+body.touch #toast.show { transform: translate(-50%, 0); }
+body.touch #light-ind { left: auto; right: max(14px, env(safe-area-inset-right)); top: max(14px, env(safe-area-inset-top)); }
+body.touch #gallery { bottom: auto; top: 50%; right: max(150px, env(safe-area-inset-right)); }
 body.touch #hint { display: none; }
 body.touch #buoy { right: auto; left: 12px; top: auto; bottom: 30px; transform: scale(0.8); transform-origin: left bottom; display: none; }
 
+@media (max-height: 500px) {
+  .title-inner { padding-top: 18px; }
+  h1 { font-size: 34px; margin-bottom: 12px; }
+  .site p { display: none; }
+  .opts { margin: 12px 0 10px; }
+}
 @media (max-width: 600px) {
   #computer { width: 200px; }
   .dc-cell.big span { font-size: 32px; }
 }
+body.touch #toast { opacity: 0; transition: transform 0.5s, opacity 0.4s; }
+body.touch #toast.show { opacity: 1; }
